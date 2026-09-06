@@ -1,5 +1,7 @@
 package com.example.demo.openapi.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.game.service.PointService;
 import com.example.demo.openapi.dto.*;
 import com.example.demo.openapi.service.OpenPetInputService;
@@ -23,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/open/v1")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "x-user-id")  
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Open API - PET 입력")
 public class OpenPetInputController {
 
@@ -34,6 +36,7 @@ public class OpenPetInputController {
 
     // from이 없으면 전체, 있으면 해당 시점부터 합계
     // format=plain은 숫자만 응답
+    @PreAuthorize("hasRole('USER') and #userId == authentication.name")
     @GetMapping("/users/{userId}/total-count")
     public ResponseEntity<?> getUserTotal(
             @PathVariable String userId,
@@ -57,6 +60,7 @@ public class OpenPetInputController {
         return svc.getSchoolTotal(schoolId);
     }
 
+    @PreAuthorize("hasRole('USER') and #userId == authentication.name")
     @GetMapping("/users/{userId}/recent-logs")
     public List<PetLogPublicDto> recentLogs(@PathVariable String userId,
                                             @RequestParam(defaultValue = "20")

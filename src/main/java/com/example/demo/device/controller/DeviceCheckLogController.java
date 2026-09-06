@@ -1,5 +1,7 @@
 package com.example.demo.device.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.admin.entity.AdminEntity;
 import com.example.demo.admin.repository.AdminRepository;
 import com.example.demo.device.dto.DeviceCheckLogDto;
@@ -19,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/device-logs")
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class DeviceCheckLogController {
      * 관리자 작업 이력 저장 (수거/점검/수리 등)
      * POST /api/device-logs
      */
+    @PreAuthorize("#request.adminId != null and #request.adminId.toString() == authentication.name")
     @PostMapping
     public ResponseEntity<?> logAction(@RequestBody LogRequest request) {
         AdminEntity admin = adminRepository.findById(request.getAdminId())

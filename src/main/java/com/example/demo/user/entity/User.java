@@ -1,5 +1,7 @@
 package com.example.demo.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ public class User {
     private String name;
 
     @Column(name = "password", nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(name = "phone_number", nullable = false, unique = true, length = 13)

@@ -1,5 +1,7 @@
 package com.example.demo.device.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,6 @@ import com.example.demo.device.dto.PetInputLogDto;
 import com.example.demo.device.dto.PetInputResult;
 import com.example.demo.device.service.PetInputLogService;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/device")
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class PetInputLogController {
         }
     }
 
+    @PreAuthorize("#userId == authentication.name")
     @GetMapping("/logs/{userId}")
     public ResponseEntity<List<PetInputLogDto>> getUserLogs(@PathVariable String userId) {
         List<PetInputLogDto> logs = petInputLogService.getLogsByUserId(userId);

@@ -9,12 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@SecurityScheme(
-        name = "x-user-id",
-        type = SecuritySchemeType.APIKEY,
-        paramName = "x-user-id",
-        in = SecuritySchemeIn.HEADER
-)
+@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 public class OpenApiConfig {
 
     @Bean

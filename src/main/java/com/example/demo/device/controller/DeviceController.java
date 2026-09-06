@@ -1,5 +1,7 @@
 package com.example.demo.device.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.device.dto.CapacityRequest;
 import com.example.demo.device.dto.DeviceStatusResponse;
 import com.example.demo.device.entity.Device;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 @RequestMapping("/api/devices")
@@ -54,6 +55,7 @@ public class DeviceController {
     }
 
     // 수거 완료 시 적재율(%) 0으로 초기화
+    @PreAuthorize("#adminId.toString() == authentication.name")
     @PostMapping("/reset-load")
     public ResponseEntity<String> resetLoadRate(
             @RequestParam Long deviceId,

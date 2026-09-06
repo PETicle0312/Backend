@@ -1,5 +1,11 @@
 package com.example.demo.admin.controller;
 
+import com.example.demo.security.TokenRole;
+
+import com.example.demo.security.AuthService;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.admin.dto.AdminInfoResponseDto;
 import com.example.demo.admin.dto.AdminInfoUpdateRequestDto;
 import com.example.demo.admin.dto.AdminLoginRequestDto;
@@ -27,11 +33,13 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuthService authService;
 
     @Autowired
     private DeviceRepository deviceRepository;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, AuthService authService) {
+        this.authService = authService;
         this.adminService = adminService;
     }
 
@@ -39,14 +47,11 @@ public class AdminController {
     public ResponseEntity<?> login(@RequestBody AdminLoginRequestDto dto) {
         log.info("관리자 로그인 요청을 수신했습니다.");
 
-        AdminLoginResponseDto result = adminService.login(dto);
-        if (result != null) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
-        }
+        return ResponseEntity.ok().header("Cache-Control", "no-store").body(
+            authService.login(dto.getAdminId() == null ? null : dto.getAdminId().toString(), dto.getPassword(), TokenRole.ADMIN));
     }
 
+    @PreAuthorize("#adminId.toString() == authentication.name")
     @GetMapping("/schools")
     public ResponseEntity<List<SchoolStatusResponse>> getSchoolsByRegion(@RequestParam Long adminId) {
         List<SchoolEntity> schools = adminService.getSchoolsByAdminRegion(adminId);
@@ -69,6 +74,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("#request.adminId != null and #request.adminId.toString() == authentication.name")
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequestDto request) {
         boolean result = adminService.changePassword(
@@ -84,6 +90,7 @@ public class AdminController {
         }
     }
 
+    @PreAuthorize("#adminId.toString() == authentication.name")
     @PutMapping("/{adminId}/info")
     public ResponseEntity<String> updateAdminInfo(
             @PathVariable Long adminId,
@@ -94,6 +101,7 @@ public class AdminController {
         return ResponseEntity.ok("관리자 정보가 변경되었습니다.");
     }
 
+    @PreAuthorize("#adminId.toString() == authentication.name")
     @GetMapping("/{adminId}/info")
     public ResponseEntity<AdminInfoResponseDto> getAdminInfo(@PathVariable Long adminId) {
         return adminService.getAdminInfo(adminId)
@@ -101,6 +109,7 @@ public class AdminController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    @PreAuthorize("#adminId.toString() == authentication.name")
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationResponseDto>> getNotifications(@RequestParam Long adminId) {
         log.debug("관리자 알림 조회 요청을 수신했습니다.");
