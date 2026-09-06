@@ -1,5 +1,13 @@
 package com.example.demo.user.controller;
 
+import com.example.demo.security.TokenRole;
+
+import com.example.demo.security.JwtService;
+
+import com.example.demo.security.AuthService;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.user.dto.*;
 import com.example.demo.user.service.UserService;
 import com.example.demo.user.service.LifeService;
@@ -17,39 +25,45 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // 개발 중 CORS 허용 (배포 시 도메인 제한)
 public class UserController {
 
     private final UserService userService;
     private final LifeService lifeService;
+    private final AuthService authService;
 
+    // 회원가입
     @PostMapping("/register")
     public String registerUser(@RequestBody UserRegisterDto dto) {
         if (dto == null) {
-            log.warn("회원가입 요청 DTO가 null");
+            log.warn("회원가입 요청 DTO가 null입니다.");
             return "입력된 데이터가 잘못되었습니다.";
         }
         log.info("회원가입 요청을 수신했습니다.");
         return userService.registerUser(dto);
     }
 
+    // 로그인
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto dto) {
+    public ResponseEntity<JwtService.Pair> login(@RequestBody LoginRequestDto dto) {
         log.debug("로그인 요청을 수신했습니다.");
-        return ResponseEntity.ok(userService.login(dto));
+        return ResponseEntity.ok().header("Cache-Control", "no-store").body(authService.login(dto.getUserId(), dto.getPassword(), TokenRole.USER));
     }
 
+    // 랭킹
     @GetMapping("/ranking")
     public ResponseEntity<List<UserRankingDto>> getRanking() {
         return ResponseEntity.ok(userService.getUserRanking());
     }
 
+    // 게임 세션 시작
+    @PreAuthorize("#dto.userId == authentication.name")
     @PostMapping("/session/start")
     public ResponseEntity<String> startSession(@RequestBody StartSessionDto dto) {
         userService.startGameSession(dto);
         return ResponseEntity.ok("게임 세션 시작됨");
     }
 
+    // 휴대폰 인증
     @PostMapping("/verify-phone")
     public ResponseEntity<String> verifyPhoneNumber(@RequestBody PhoneVerifyDto dto) {
         String phone = dto.getPhoneNumber();
@@ -59,6 +73,7 @@ public class UserController {
         return ResponseEntity.ok("휴대폰 번호 인증 성공");
     }
 
+    // 아이디 중복 확인
     @PostMapping("/check-id")
     public ResponseEntity<?> checkId(@RequestBody Map<String, String> body) {
         String userId = body.get("userId");
@@ -73,11 +88,21 @@ public class UserController {
         }
     }
 
+    // 학번 인증 없이 저장
+    @GetMapping("/check-student")
+    public ResponseEntity<String> checkStudent(@RequestParam String studentNumber) {
+        return ResponseEntity.ok("재활용을 시작합니다");
+    }
+
+    // 현재 하트 조회
+    @PreAuthorize("#userId == authentication.name")
     @GetMapping("/lives")
     public ResponseEntity<Integer> getLives(@RequestParam String userId) {
         return ResponseEntity.ok(lifeService.currentLives(userId));
     }
 
+    // 하트 차감
+    @PreAuthorize("#userId == authentication.name")
     @PostMapping("/lives/consume")
     public ResponseEntity<Integer> consumeLife(@RequestParam String userId) {
         try {

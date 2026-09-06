@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/open/v1")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "x-user-id")  
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Open API - 학교 검색")
 public class OpenSchoolController {
 

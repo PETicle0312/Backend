@@ -79,35 +79,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LoginResponseDto login(LoginRequestDto dto) {
-        User user = userRepository.findByUserId(dto.getUserId()).orElse(null);
-
-        if (user == null) {
-            return new LoginResponseDto("아이디가 존재하지 않습니다.", false);
-        }
-        if (!new BCryptPasswordEncoder().matches(dto.getPassword(), user.getPassword())) {
-            return new LoginResponseDto("비밀번호가 일치하지 않습니다.", false);
-        }
-
-        int recycleCount = petInputLogRepository.countByUserId(user);
-        Integer highestScore = rankingRepository.findHighestScoreByUserId(user);
-        if (highestScore == null)
-            highestScore = 0;
-
-        return new LoginResponseDto(
-                "로그인 성공",
-                true,
-                user.getUserId(),
-                user.getCharName(),
-                user.getTotalLives(),
-                recycleCount,
-                highestScore
-
-        );
-
-    }
-
-    @Override
     public List<UserRankingDto> getUserRanking() {
         return null;
     }

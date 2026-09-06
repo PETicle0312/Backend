@@ -26,22 +26,6 @@ public class AdminServiceImpl implements AdminService {
     private final DeviceCheckLogRepository deviceCheckLogRepository;
 
     @Override
-    public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
-        AdminEntity admin = adminRepository.findByAdminId(dto.getAdminId())
-                .orElse(null);
-
-        if (admin == null || !admin.getAdmPassword().equals(dto.getPassword())) {
-            return null;
-        }
-
-        return AdminLoginResponseDto.builder()
-                .adminId(admin.getAdminId())
-                .adminName(admin.getAdmName())
-                .adminRegion(admin.getAdminRegion())
-                .build();
-    }
-
-    @Override
     public List<SchoolEntity> getSchoolsByAdminRegion(Long adminId) {
         AdminEntity admin = adminRepository.findByAdminId(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("❌ 해당 관리자 ID를 찾을 수 없습니다: " + adminId));
@@ -56,11 +40,13 @@ public class AdminServiceImpl implements AdminService {
         AdminEntity admin = adminRepository.findByAdminId(adminId)
                 .orElseThrow(() -> new RuntimeException("❌ 해당 관리자를 찾을 수 없습니다."));
 
-        if (!admin.getAdmPassword().equals(currentPassword)) {
+        if (currentPassword == null || newPassword == null || newPassword.isBlank()
+                || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72
+                || !new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().matches(currentPassword, admin.getAdmPassword())) {
             return false;
         }
 
-        admin.setAdmPassword(newPassword);
+        admin.setAdmPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(12).encode(newPassword));
         adminRepository.save(admin);
         return true;
     }

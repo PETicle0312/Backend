@@ -1,5 +1,7 @@
 package com.example.demo.admin.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,6 +26,7 @@ public class AdminEntity {
     private String admName;
 
     @Column(name = "adm_password",nullable = false)
+    @JsonIgnore
     private String admPassword;
 
     @Column(name = "adm_phone_number",nullable = false, unique = true, length = 13)
@@ -35,5 +38,5 @@ public class AdminEntity {
 
     @Column(name = "admin_region", length = 50)
     private String adminRegion;
-    
+
 }

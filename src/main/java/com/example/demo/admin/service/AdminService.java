@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AdminService {
-    AdminLoginResponseDto login(AdminLoginRequestDto dto);
 
     List<SchoolEntity> getSchoolsByAdminRegion(Long adminId);
 

@@ -1,5 +1,7 @@
 package com.example.demo.game.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.example.demo.game.dto.GameResultRequestDto;
 import com.example.demo.game.dto.GameResultResponseDto;
 import com.example.demo.game.entity.GameSession;
@@ -15,12 +17,14 @@ public class GameController {
 
     private final GameService gameService;
 
+    @PreAuthorize("#dto.userId == authentication.name")
     @PostMapping("/submit")
     public ResponseEntity<GameResultResponseDto> submitResult(@RequestBody GameResultRequestDto dto) {
         GameResultResponseDto response = gameService.processGameResult(dto);
         return ResponseEntity.ok(response);
     }
-        @PostMapping("/record")
+        @PreAuthorize("#userId == authentication.name")
+    @PostMapping("/record")
     public ResponseEntity<GameSession> recordGame(
             @RequestParam String userId,
             @RequestParam int score,
