@@ -24,6 +24,9 @@ public class SchoolServiceImpl implements SchoolService {
     private final SchoolRepository schoolRepository;
     private final SchoolStudentRepository studentRepository;
     private final RestTemplate restTemplate;
+
+    @org.springframework.beans.factory.annotation.Value("${neis.api-key:}")
+    private String neisApiKey;
     
 
     @Override
@@ -36,6 +39,9 @@ public class SchoolServiceImpl implements SchoolService {
 
     @Override
     public List<SchoolSearchResponseDto> searchSchoolsFromOpenApi(String keyword, String region) {
+        if (neisApiKey == null || neisApiKey.isBlank()) {
+            throw new IllegalStateException("NEIS_API_KEY is not configured");
+        }
         List<SchoolSearchResponseDto> result = new ArrayList<>();
 
         int page = 1;
@@ -43,7 +49,7 @@ public class SchoolServiceImpl implements SchoolService {
 
         while (hasMore) {
             String apiUrl = "https://open.neis.go.kr/hub/schoolInfo" +
-                            "?KEY=1c3792e5f07d4c64beab09cf53ef1e19" +
+                            "?KEY=" + neisApiKey +
                             "&Type=json" +
                             "&pIndex=" + page +
                             "&pSize=100";
@@ -99,7 +105,8 @@ public class SchoolServiceImpl implements SchoolService {
                 }
 
             } catch (Exception e) {
-                log.error("교육부 학교 API 조회에 실패했습니다.", e);
+                // HTTP 예외 메시지에는 API 키가 포함된 요청 URL이 들어갈 수 있다.
+                log.error("교육부 학교 API 조회 실패: {}", e.getClass().getSimpleName());
                 hasMore = false;
             }
         }

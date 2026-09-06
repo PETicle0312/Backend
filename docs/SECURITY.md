@@ -107,6 +107,7 @@ export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 운영 환경 변수:
 
 - `JWT_SECRET`: 최소 32 랜덤 바이트의 Base64. 기본값 없이 누락 시 기동 실패. 예: `openssl rand -base64 32`. 테스트 전용 0바이트 키를 운영에 쓰지 않는다.
+- `NEIS_API_KEY`: 학교 조회 API 키. 미설정 시 외부 학교 조회를 거부한다. 이전 소스에 포함되었던 키는 발급처에서 폐기·재발급해야 한다.
 - `DB_PASSWORD`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_SSL`
 - `CORS_ALLOWED_ORIGINS`: 허용 웹 앱 origin을 쉼표로 지정. 기본은 cross-origin 허용 없음. 쿠키 인증과 credentials를 사용하지 않는다.
 
